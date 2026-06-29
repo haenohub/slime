@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>슬라임 키우기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 타이틀 바 -->
+  <div id="title-bar">
+    <img id="title-img" src="assets/타이틀_슬라임키우기.png" alt="슬라임 키우기">
+  </div>
+
+  <div id="game-wrapper">
+    <!-- 캔버스 래퍼: 캔버스 크기에 딱 맞게 줄어들어 버튼이 맵 모서리에 정확히 붙음 -->
+    <div id="canvas-wrap">
+      <canvas id="game-canvas" width="1536" height="1024"></canvas>
+      <!-- 상태 버튼: canvas-wrap 기준 우측 상단 -->
+      <button id="status-btn" aria-label="상태창 열기">
+        <img src="assets/상태_슬라임키우기_transparent.png" alt="상태">
+      </button>
+    </div>
+
+    <!-- 슬라임 상태창 (이미지 배경 + 데이터 오버레이) -->
+    <div id="status-panel" class="hidden" role="dialog" aria-modal="true">
+      <!-- 닫기 버튼 (패널 외부 우측 상단) -->
+      <button id="close-btn" aria-label="닫기">✕</button>
+
+      <div id="panel-container">
+        <!-- 배경 이미지 -->
+        <img id="panel-bg" src="assets/상태창_슬라임키우기_transparent.png" alt="">
+
+        <!-- 초상화 (슬라임 스프라이트) -->
+        <img id="ov-portrait" src="assets/slime_idle_1.png" alt="슬라임">
+
+        <!-- 이름 -->
+        <div class="ov" id="ov-name">이름 없는 슬라임</div>
+
+        <!-- 레벨 -->
+        <div class="ov" id="ov-lv">1</div>
+
+        <!-- HP 바 + 수치 -->
+        <div id="ov-hp-bar"><div id="hp-fill"></div></div>
+        <div class="ov" id="ov-hp-txt">10 / 10</div>
+
+        <!-- ATK / DEF -->
+        <div class="ov" id="ov-atk">2</div>
+        <div class="ov" id="ov-def">0</div>
+
+        <!-- EXP 바 -->
+        <div id="ov-exp-bar"><div id="exp-fill"></div></div>
+
+        <!-- 인벤토리 슬롯 (투명 클릭 영역 9칸) -->
+        <div id="ov-inventory"></div>
+      </div>
+    </div>
+
+    <!-- 오버레이 (상태창 닫기용) -->
+    <div id="overlay" class="hidden"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

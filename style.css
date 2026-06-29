@@ -1,0 +1,298 @@
+/* ── 기본 리셋 ── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0a0a12;
+  display: flex;
+  flex-direction: column;   /* 타이틀 바 + 게임 영역 세로 배치 */
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+}
+
+/* ── 타이틀 바 ── */
+#title-bar {
+  flex-shrink: 0;
+  height: 22vh;
+  min-height: 90px;
+  max-height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0 0;           /* 하단 패딩 제거 → 게임 화면과 간격 절반으로 */
+  margin-bottom: -4vh;        /* 음수 마진으로 간격 추가 축소 */
+  background: linear-gradient(to bottom, #0d1a0d, #0a0a12);
+}
+
+#title-img {
+  height: 100%;
+  width: auto;
+  max-width: 80vw;
+  object-fit: contain;
+  /* 타이틀 로고 발광 효과 */
+  filter: drop-shadow(0 0 18px rgba(80, 220, 80, 0.55))
+          drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
+}
+
+/* ── 게임 래퍼 & 캔버스 ── */
+#game-wrapper {
+  position: relative;
+  flex: 1;                  /* 타이틀 바 아래 남은 공간 전부 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;        /* 위로 이동 시 클리핑 방지 */
+}
+
+/* 캔버스를 감싸는 래퍼: 렌더링된 캔버스 크기에 딱 맞게 줄어듦 */
+#canvas-wrap {
+  position: relative;
+  display: inline-block;    /* 캔버스 실제 표시 크기에 맞춰 수축 */
+  line-height: 0;           /* 인라인 블록 하단 여백 제거 */
+  transform: translateY(-50px);  /* 게임 화면 위로 50px 이동 */
+}
+
+#game-canvas {
+  /* 도트 이미지 뭉개짐 방지 */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  /* 뷰포트의 70% 크기로 제한 → 약 30% 축소 */
+  max-width: 70vw;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  display: block;
+  cursor: default;
+}
+
+/* ── 상태 버튼 (이미지 버튼, canvas-wrap 기준 맵 우측 상단) ── */
+#status-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 30;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 130px;           /* 버튼 표시 크기 */
+  transition: transform 0.1s, filter 0.1s;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+}
+
+#status-btn img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#status-btn:hover {
+  transform: scale(1.06);
+  filter: drop-shadow(0 4px 10px rgba(80,220,80,0.5));
+}
+
+#status-btn:active {
+  transform: scale(0.97);
+}
+
+
+/* ── 오버레이 (모달 배경, 타이틀 바까지 전체 덮음) ── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+}
+
+#overlay.hidden { display: none; }
+
+/* ── 상태창 (이미지 배경 + 오버레이 방식) ── */
+#status-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+}
+
+#status-panel.hidden { display: none; }
+
+/* 닫기 버튼 (패널 우측 상단 바깥) */
+#close-btn {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  z-index: 10;
+  background: #1a1a1a;
+  border: 2px solid #5dbb5d;
+  color: #5dbb5d;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 #000;
+  transition: background 0.1s, color 0.1s;
+}
+
+#close-btn:hover { background: #5dbb5d; color: #000; }
+
+/* 이미지 배경 컨테이너 */
+#panel-container {
+  position: relative;
+  width: 380px;   /* 표시 너비 (원본 944px 기준 약 40% 스케일) */
+}
+
+#panel-bg {
+  width: 100%;
+  display: block;
+  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.75));
+}
+
+/* 공통 오버레이 텍스트 */
+.ov {
+  position: absolute;
+  font-family: 'Press Start 2P', monospace;
+  pointer-events: none;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+}
+
+/* 초상화 (슬라임 스프라이트) — 포트레이트 프레임 내부 석재 영역 */
+#ov-portrait {
+  position: absolute;
+  left: 78px;
+  top: 55px;
+  width: 70px;
+  height: 80px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+/* 이름 — 이름 박스 중앙 (display center=(236,96), box left=138 w=197) */
+#ov-name {
+  left: 129px;
+  top: 86px;
+  width: 197px;
+  text-align: center;
+  font-size: 10px;
+  color: #f5e6c3;
+  word-break: keep-all;
+  line-height: 1.5;
+}
+
+/* 레벨 — LV 행 (display y=152~171, 중심 y=162) */
+#ov-lv {
+  left: 215px;
+  top: 155px;
+  font-size: 9px;
+  color: #a8f0a8;
+}
+
+/* HP 바 (display y=175~194) */
+#ov-hp-bar {
+  position: absolute;
+  left: 138px;
+  top: 176px;
+  width: 158px;
+  height: 11px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2aaa2a, #7fff7f);
+  transition: width 0.35s;
+}
+
+#ov-hp-txt {
+  left: 200px;
+  top: 178px;
+  font-size: 6px;
+  color: #e0ffe0;
+}
+
+/* ATK — ATK/DEF 행 좌측 (display y=196~217, 중심 y=207) */
+#ov-atk {
+  left: 142px;
+  top: 201px;
+  font-size: 9px;
+  color: #f5c842;
+}
+
+/* DEF — ATK/DEF 행 우측 */
+#ov-def {
+  left: 256px;
+  top: 201px;
+  font-size: 9px;
+  color: #82c4f0;
+}
+
+/* EXP 바 (display y=221~243) */
+#ov-exp-bar {
+  position: absolute;
+  left: 138px;
+  top: 222px;
+  width: 158px;
+  height: 11px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #b8860b, #ffd700);
+  transition: width 0.35s;
+}
+
+/* 인벤토리 3×3
+   슬롯 내부 중심 x=156,224,292 (간격 68px, 외부 left=126)
+   행 시작 display y=276,329,384 → row=54px, row-gap=0 */
+#ov-inventory {
+  position: absolute;
+  left: 108px;
+  top: 256px;
+  display: grid;
+  grid-template-columns: repeat(3, 35px);
+  grid-template-rows: repeat(3, 35px);
+  column-gap: 29px;
+  row-gap: 21px;
+}
+
+.inv-slot {
+  position: relative;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inv-slot img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.inv-count {
+  position: absolute;
+  bottom: 1px;
+  right: 3px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: #ffd700;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
